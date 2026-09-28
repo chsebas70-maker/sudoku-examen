@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebastian Carrasco Hernandez - Resolvedor de Sudoku</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .instrucciones {
+            background-color: #fff;
+            border-left: 5px solid #0056b3;
+            padding: 15px;
+            max-width: 500px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 40px);
+            grid-template-rows: repeat(9, 40px);
+            gap: 1px;
+            background-color: #000;
+            border: 3px solid #000;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Bordes de subcuadrículas de 3x3 */
+        .cell:nth-child(3n) { border-right: 2px solid #000; }
+        .cell:nth-child(9n) { border-right: none; }
+        .row-2, .row-5 { border-bottom: 2px solid #000; }
+
+        .initial {
+            background-color: #e9ecef;
+            color: #000;
+        }
+
+        .solved {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #003d80;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Reemplaza con tu nombre completo -->
+    <h1>Sebastian Carrasco Hernandez</h1>
+
+    <div class="instrucciones">
+        <h3>Instrucciones para el Usuario</h3>
+        <p>A continuación se presenta el Sudoku propuesto en el examen[span_4](start_span)[span_4](end_span). Presiona el botón <strong>"Resolver Sudoku"</strong> para calcular y visualizar la solución en tiempo real[span_5](start_span)[span_5](end_span).</p>
+    </div>
+
+    <div id="sudoku-grid"></div>
+
+    <button onclick="resolverYMostrar()">Resolver Sudoku</button>
+
+    <script>
+        const tableroInicial = [
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        ];
+
+        let tablero = JSON.parse(JSON.stringify(tableroInicial));
+
+        function renderizarTablero() {
+            const grid = document.getElementById("sudoku-grid");
+            grid.innerHTML = "";
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const div = document.createElement("div");
+                    div.classList.add("cell");
+                    if (r === 2 || r === 5) div.classList.add(`row-${r}`);
+                    
+                    if (tableroInicial[r][c] !== 0) {
+                        div.classList.add("initial");
+                        div.textContent = tableroInicial[r][c];
+                    } else if (tablero[r][c] !== 0) {
+                        div.classList.add("solved");
+                        div.textContent = tablero[r][c];
+                    }
+                    grid.appendChild(div);
+                }
+            }
+        }
+
+        function esValido(board, fila, col, num) {
+            for (let x = 0; x < 9; x++) {
+                if (board[fila][x] === num || board[x][col] === num) return false;
+            }
+            let startRow = fila - fila % 3, startCol = col - col % 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[i + startRow][j + startCol] === num) return false;
+                }
+            }
+            return true;
+        }
+
+        function resolver(board) {
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (board[row][col] === 0) {
+                        for (let num = 1; num <= 9; num++) {
+                            if (esValido(board, row, col, num)) {
+                                board[row][col] = num;
+                                if (resolver(board)) return true;
+                                board[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function resolverYMostrar() {
+            resolver(tablero);
+            renderizarTablero();
+        }
+
+        // Renderizado inicial
+        renderizarTablero();
+    </script>
+</body>
+</html>
